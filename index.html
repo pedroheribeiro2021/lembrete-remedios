@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Meus Remédios</title>
+<meta name="theme-color" content="#2f6f4f" />
+<link rel="manifest" href="manifest.json" />
+<link rel="icon" href="icon.svg" type="image/svg+xml" />
+<link rel="apple-touch-icon" href="icon.svg" />
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="app-header">
+    <h1>💊 Meus Remédios</h1>
+    <p id="today-label" class="today-label"></p>
+  </header>
+
+  <main>
+    <section id="alert-banner" class="alert-banner hidden"></section>
+
+    <section class="notif-bar" id="notif-bar">
+      <button id="btn-enable-notif" class="btn btn-secondary">🔔 Ativar lembretes</button>
+      <p class="notif-hint">Deixe esta aba aberta (pode minimizar) para os lembretes tocarem nos horários.</p>
+    </section>
+
+    <section class="section">
+      <h2>Horários de hoje</h2>
+      <div id="today-list" class="today-list"></div>
+      <p id="empty-today" class="empty-msg hidden">Nenhum remédio cadastrado ainda. Adicione um abaixo.</p>
+    </section>
+
+    <section class="section">
+      <div class="section-header">
+        <h2>Meus remédios cadastrados</h2>
+        <button id="btn-new-med" class="btn btn-primary">+ Novo remédio</button>
+      </div>
+      <div id="meds-list" class="meds-list"></div>
+    </section>
+  </main>
+
+  <div id="med-modal" class="modal hidden">
+    <div class="modal-content">
+      <h2 id="modal-title">Novo remédio</h2>
+      <form id="med-form">
+        <label>
+          Nome do remédio
+          <input type="text" id="med-name" required placeholder="Ex: Losartana" />
+        </label>
+        <label>
+          Dose / observação (opcional)
+          <input type="text" id="med-dose" placeholder="Ex: 1 comprimido, 50mg" />
+        </label>
+        <label>Horários</label>
+        <div id="times-list" class="times-list"></div>
+        <button type="button" id="btn-add-time" class="btn btn-secondary btn-small">+ Adicionar horário</button>
+
+        <div class="modal-actions">
+          <button type="button" id="btn-delete-med" class="btn btn-danger hidden">Excluir remédio</button>
+          <div class="modal-actions-right">
+            <button type="button" id="btn-cancel-med" class="btn btn-ghost">Cancelar</button>
+            <button type="submit" class="btn btn-primary">Salvar</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

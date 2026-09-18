@@ -1,0 +1,12 @@
+{
+  "name": "Meus Remédios",
+  "short_name": "Remédios",
+  "description": "Lembrete de horários de remédio e controle de doses tomadas",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#f4f7f5",
+  "theme_color": "#2f6f4f",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}
