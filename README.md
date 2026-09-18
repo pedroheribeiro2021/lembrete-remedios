@@ -23,10 +23,11 @@ Depois abra o endereço mostrado no navegador. No celular, abra o mesmo endereç
 - Cadastro de remédios com nome, dose/observação e um ou mais horários.
 - Lista "Horários de hoje" mostrando todos os horários do dia em ordem, com o remédio de cada um, status (pendente / atrasado / tomado) e um botão para marcar "Tomei".
 - Histórico por dia salvo automaticamente (fica marcado mesmo se você recarregar a página).
-- Lembrete sonoro + notificação do navegador quando chega a hora de um remédio ainda não tomado (repete a cada 5 minutos enquanto não for marcado, por até 1 hora).
+- **Alarme de verdade (Android)**: cada horário tem um botão "⏰ Criar alarme" que abre o app de Relógio nativo do Android já preenchido com o horário e o nome do remédio. Você confirma o salvamento uma vez (e pode marcar "repetir todos os dias") — dali em diante é o alarme nativo do aparelho tocando, com som alto, vibração e prioridade sobre o modo silencioso. Só aparece em navegadores Android.
+- Lembrete sonoro + notificação do navegador enquanto a página está aberta, como reforço (repete a cada 5 minutos enquanto não for marcado, por até 1 hora).
 
 ## Limitação importante
 
-Os lembretes usam a *Notification API* do navegador e um temporizador dentro da própria página. Isso funciona enquanto a aba/app estiver aberto (pode estar minimizado ou em outra aba), mas **não dispara se o navegador estiver totalmente fechado**. Não há servidor por trás — tudo roda e é salvo localmente no seu navegador (`localStorage`), então os dados não sincronizam entre dispositivos diferentes.
+O botão "⏰ Criar alarme" resolve o problema de tocar alto mesmo com o celular fechado/travado, porque delega isso ao alarme nativo do Android — a web não tem acesso ao `AlarmManager` do sistema, então essa é a única forma confiável.
 
-Se no futuro for importante ter alarme mesmo com o navegador fechado, o caminho é um app nativo/híbrido (ex: React Native) com notificações agendadas pelo sistema operacional.
+Já o lembrete sonoro embutido no app (Notification API + temporizador na página) só funciona enquanto a aba/app estiver aberto (pode estar minimizado), e **não dispara se o navegador estiver totalmente fechado** — sirva apenas como reforço visual/sonoro para quando você já está com o app aberto. Não há servidor por trás; tudo é salvo localmente no navegador (`localStorage`), então os dados não sincronizam entre dispositivos diferentes.

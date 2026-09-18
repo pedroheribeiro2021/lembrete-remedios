@@ -62,6 +62,29 @@ function timeToMinutes(t) {
   return h * 60 + m;
 }
 
+// ---------- Alarme nativo do Android ----------
+
+function isAndroid() {
+  return /Android/i.test(navigator.userAgent);
+}
+
+// Abre a tela de "Novo alarme" do app de Relógio do Android, já preenchida
+// com o horário e o nome do remédio. O usuário confirma o salvamento (e pode
+// marcar "repetir todos os dias") — dali em diante é o alarme nativo do
+// aparelho, com som, vibração e prioridade sobre o silencioso.
+function buildAlarmIntentUrl(med, time) {
+  const [hour, minute] = time.split(":").map(Number);
+  const label = med.dose ? `${med.name} - ${med.dose}` : med.name;
+  const parts = [
+    "action=android.intent.action.SET_ALARM",
+    `S.android.intent.extra.alarm.MESSAGE=${encodeURIComponent(label)}`,
+    `i.android.intent.extra.alarm.HOUR=${hour}`,
+    `i.android.intent.extra.alarm.MINUTES=${minute}`,
+    "B.android.intent.extra.alarm.SKIP_UI=false",
+  ];
+  return `intent:#Intent;${parts.join(";")};end`;
+}
+
 // ---------- Render: hoje ----------
 
 function renderToday() {
@@ -124,9 +147,12 @@ function renderToday() {
         ${med.dose ? `<div class="dose-dose">${escapeHtml(med.dose)}</div>` : ""}
         <div class="dose-status ${status}">${statusLabel}</div>
       </div>
-      <button class="dose-toggle ${taken ? "taken" : ""}" data-med="${med.id}" data-time="${time}">
-        ${taken ? "✓ Tomei" : "Marcar"}
-      </button>
+      <div class="dose-actions">
+        <button class="dose-toggle ${taken ? "taken" : ""}" data-med="${med.id}" data-time="${time}">
+          ${taken ? "✓ Tomei" : "Marcar"}
+        </button>
+        ${isAndroid() ? `<a class="dose-alarm-link" href="${buildAlarmIntentUrl(med, time)}">⏰ Criar alarme</a>` : ""}
+      </div>
     `;
     container.appendChild(card);
   });
