@@ -72,17 +72,42 @@ function isAndroid() {
 // com o horário e o nome do remédio. O usuário confirma o salvamento (e pode
 // marcar "repetir todos os dias") — dali em diante é o alarme nativo do
 // aparelho, com som, vibração e prioridade sobre o silencioso.
+function alarmLabel(med) {
+  return med.dose ? `${med.name} - ${med.dose}` : med.name;
+}
+
 function buildAlarmIntentUrl(med, time) {
   const [hour, minute] = time.split(":").map(Number);
-  const label = med.dose ? `${med.name} - ${med.dose}` : med.name;
   const parts = [
     "action=android.intent.action.SET_ALARM",
-    `S.android.intent.extra.alarm.MESSAGE=${encodeURIComponent(label)}`,
+    `S.android.intent.extra.alarm.MESSAGE=${encodeURIComponent(alarmLabel(med))}`,
     `i.android.intent.extra.alarm.HOUR=${hour}`,
     `i.android.intent.extra.alarm.MINUTES=${minute}`,
     "B.android.intent.extra.alarm.SKIP_UI=false",
   ];
   return `intent:#Intent;${parts.join(";")};end`;
+}
+
+// Abre a lista de alarmes do app de Relógio nativo — é o único jeito de
+// editar ou apagar um alarme já criado: nenhum site (nem app de terceiros)
+// tem permissão do Android para ler/alterar os alarmes de outro app.
+function buildShowAlarmsIntentUrl() {
+  return "intent:#Intent;action=android.intent.action.SHOW_ALARMS;end";
+}
+
+// Alguns apps de Relógio de fabricante (Xiaomi, algumas versões de
+// Samsung/Motorola) não respondem a SET_ALARM e o Android não avisa nada —
+// o toque simplesmente não faz efeito. Por isso copiamos o horário e o nome
+// do remédio para a área de transferência antes de tentar abrir o alarme:
+// se o preenchimento automático falhar, o usuário já tem o que colar/digitar
+// ao abrir o Relógio manualmente (ou pelo botão "Ver alarmes no Relógio").
+async function handleCreateAlarmClick(med, time) {
+  try {
+    await navigator.clipboard.writeText(`${time} - ${alarmLabel(med)}`);
+  } catch {
+    // clipboard indisponível; segue sem copiar
+  }
+  window.location.href = buildAlarmIntentUrl(med, time);
 }
 
 // ---------- Render: hoje ----------
@@ -151,7 +176,7 @@ function renderToday() {
         <button class="dose-toggle ${taken ? "taken" : ""}" data-med="${med.id}" data-time="${time}">
           ${taken ? "✓ Tomei" : "Marcar"}
         </button>
-        ${isAndroid() ? `<a class="dose-alarm-link" href="${buildAlarmIntentUrl(med, time)}">⏰ Criar alarme</a>` : ""}
+        ${isAndroid() ? `<button class="dose-alarm-link" data-med="${med.id}" data-time="${time}">⏰ Criar alarme</button>` : ""}
       </div>
     `;
     container.appendChild(card);
@@ -159,6 +184,11 @@ function renderToday() {
 
   document.querySelectorAll(".dose-toggle").forEach((btn) => {
     btn.addEventListener("click", () => toggleTaken(btn.dataset.med, btn.dataset.time));
+  });
+
+  document.querySelectorAll(".dose-alarm-link").forEach((btn) => {
+    const med = meds.find((m) => m.id === btn.dataset.med);
+    btn.addEventListener("click", () => handleCreateAlarmClick(med, btn.dataset.time));
   });
 
   updateAlertBanner(anyDue);
@@ -327,6 +357,11 @@ function updateNotifBarState() {
 }
 
 document.getElementById("btn-enable-notif").addEventListener("click", requestNotifications);
+
+if (isAndroid()) {
+  document.getElementById("clock-bar").classList.remove("hidden");
+  document.getElementById("btn-open-clock").href = buildShowAlarmsIntentUrl();
+}
 
 function beep() {
   try {
