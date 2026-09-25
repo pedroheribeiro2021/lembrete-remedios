@@ -410,18 +410,17 @@ function checkDueMeds() {
 }
 
 function fireReminder(med, time) {
+  if (!("Notification" in window) || Notification.permission !== "granted") return; // usuário nunca ativou os lembretes
   beep();
-  if ("Notification" in window && Notification.permission === "granted") {
-    const n = new Notification(`💊 Hora do remédio: ${med.name}`, {
-      body: `${time}${med.dose ? " • " + med.dose : ""}`,
-      tag: `${med.id}_${time}`,
-      requireInteraction: true,
-    });
-    n.onclick = () => {
-      window.focus();
-      n.close();
-    };
-  }
+  const n = new Notification(`💊 Hora do remédio: ${med.name}`, {
+    body: `${time}${med.dose ? " • " + med.dose : ""}`,
+    tag: `${med.id}_${time}`,
+    requireInteraction: true,
+  });
+  n.onclick = () => {
+    window.focus();
+    n.close();
+  };
 }
 
 // ---------- Init ----------
