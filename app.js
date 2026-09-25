@@ -1,12 +1,9 @@
 const STORAGE_KEY = "remedios_v1";
 const LOG_PREFIX = "remedios_log_";
-const NOTIF_COOLDOWN_MS = 5 * 60 * 1000; // não repete lembrete do mesmo horário antes disso
-const DUE_WINDOW_MS = 60 * 60 * 1000; // considera "atrasado" até 1h após o horário
 
 const COLORS = ["#2f6f4f", "#3d6fa8", "#a8663d", "#7d4fa8", "#c0392b", "#1f9c8a", "#b8860b"];
 
 let meds = loadMeds();
-let lastNotified = {}; // chave `${medId}_${time}_${dateKey}` -> timestamp
 let editingMedId = null;
 
 function uid() {
@@ -332,98 +329,12 @@ form.addEventListener("submit", (e) => {
   renderAll();
 });
 
-// ---------- Notificações / alarme ----------
-
-function requestNotifications() {
-  if (!("Notification" in window)) {
-    alert("Este navegador não suporta notificações.");
-    return;
-  }
-  Notification.requestPermission().then((perm) => {
-    updateNotifBarState();
-    if (perm === "granted") {
-      beep(); // confirma que o som funciona
-    }
-  });
-}
-
-function updateNotifBarState() {
-  const bar = document.getElementById("notif-bar");
-  if ("Notification" in window && Notification.permission === "granted") {
-    bar.classList.add("hidden");
-  } else {
-    bar.classList.remove("hidden");
-  }
-}
-
-document.getElementById("btn-enable-notif").addEventListener("click", requestNotifications);
+// ---------- Init ----------
 
 if (isAndroid()) {
   document.getElementById("clock-bar").classList.remove("hidden");
   document.getElementById("btn-open-clock").href = buildShowAlarmsIntentUrl();
 }
-
-function beep() {
-  try {
-    const ctx = new (window.AudioContext || window.webkitAudioContext)();
-    const playTone = (delay) => {
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.type = "sine";
-      osc.frequency.value = 880;
-      gain.gain.setValueAtTime(0.15, ctx.currentTime + delay);
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      osc.start(ctx.currentTime + delay);
-      osc.stop(ctx.currentTime + delay + 0.25);
-    };
-    playTone(0);
-    playTone(0.35);
-  } catch {
-    // ambiente sem suporte a áudio; ignora
-  }
-}
-
-function checkDueMeds() {
-  const dateKey = todayKey();
-  const log = loadLog(dateKey);
-  const now = new Date();
-  const nowMin = now.getHours() * 60 + now.getMinutes();
-
-  meds.forEach((med) => {
-    (med.times || []).forEach((time) => {
-      const logKey = `${med.id}_${time}`;
-      if (log[logKey]) return; // já tomou
-
-      const scheduledMin = timeToMinutes(time);
-      const diffMs = (nowMin - scheduledMin) * 60000;
-      if (diffMs < 0 || diffMs > DUE_WINDOW_MS) return; // ainda não chegou ou passou muito
-
-      const notifKey = `${logKey}_${dateKey}`;
-      const last = lastNotified[notifKey] || 0;
-      if (Date.now() - last < NOTIF_COOLDOWN_MS) return;
-
-      lastNotified[notifKey] = Date.now();
-      fireReminder(med, time);
-    });
-  });
-}
-
-function fireReminder(med, time) {
-  if (!("Notification" in window) || Notification.permission !== "granted") return; // usuário nunca ativou os lembretes
-  beep();
-  const n = new Notification(`💊 Hora do remédio: ${med.name}`, {
-    body: `${time}${med.dose ? " • " + med.dose : ""}`,
-    tag: `${med.id}_${time}`,
-    requireInteraction: true,
-  });
-  n.onclick = () => {
-    window.focus();
-    n.close();
-  };
-}
-
-// ---------- Init ----------
 
 function renderAll() {
   document.getElementById("today-label").textContent = formatDateLabel();
@@ -432,10 +343,7 @@ function renderAll() {
 }
 
 renderAll();
-updateNotifBarState();
-setInterval(checkDueMeds, 20000);
 setInterval(renderToday, 60000); // atualiza status (atrasado etc.) mesmo sem interação
-checkDueMeds();
 
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {

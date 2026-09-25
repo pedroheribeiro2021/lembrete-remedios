@@ -25,7 +25,8 @@ Depois abra o endereço mostrado no navegador. No celular, abra o mesmo endereç
 - Histórico por dia salvo automaticamente (fica marcado mesmo se você recarregar a página).
 - **Alarme de verdade (Android)**: cada horário tem um botão "⏰ Criar alarme" que tenta abrir o app de Relógio nativo do Android já preenchido com o horário e o nome do remédio (e copia esses dados para a área de transferência como plano B). Você confirma o salvamento uma vez (e pode marcar "repetir todos os dias") — dali em diante é o alarme nativo do aparelho tocando, com som alto, vibração e prioridade sobre o modo silencioso. Só aparece em navegadores Android.
 - **Ver/editar alarmes no Relógio (Android)**: um botão no topo abre direto a lista de alarmes do app de Relógio nativo, para editar ou apagar um alarme que você já criou.
-- Lembrete sonoro + notificação do navegador enquanto a página está aberta, como reforço (repete a cada 5 minutos enquanto não for marcado, por até 1 hora). **Só toca se você já tocou em "Ativar lembretes" e autorizou notificações** — sem isso, o app fica em silêncio.
+
+O app **não tem nenhum som, notificação ou verificação em segundo plano** — ele só faz alguma coisa quando você está com a página aberta e toca em um botão. Isso foi uma decisão deliberada: uma versão anterior tinha um lembrete sonoro embutido (checagem a cada 20s + beep), mas uma aba esquecida aberta em segundo plano ficava apitando sozinha sem o usuário perceber de onde vinha. Removido por completo — quem faz o papel de "alarme de verdade" agora é só o alarme nativo do Android (botão "Criar alarme").
 
 ## Limitações importantes
 
@@ -33,4 +34,4 @@ Depois abra o endereço mostrado no navegador. No celular, abra o mesmo endereç
 
 **O botão "Criar alarme" pode não funcionar em todo aparelho.** Ele usa um comando padrão do Android (`SET_ALARM`) que a maioria dos apps de Relógio aceita, mas alguns apps de fabricante (certas versões de Xiaomi/MIUI, Motorola, Samsung) não respondem a esse comando — e o Android não avisa nada quando isso acontece, o toque simplesmente não tem efeito. Por isso o botão copia o horário e o nome do remédio para a área de transferência antes de tentar: se o preenchimento automático falhar, abra o Relógio manualmente (pelo botão "Ver/editar alarmes") e cole/digite os dados já copiados.
 
-O lembrete sonoro embutido no app (Notification API + temporizador na página) só funciona enquanto a aba/app estiver aberto (pode estar minimizado), e **não dispara se o navegador estiver totalmente fechado** — serve apenas como reforço visual/sonoro para quando você já está com o app aberto. Se uma aba com o app ficar esquecida aberta em segundo plano num computador e houver algum remédio cadastrado com horário atrasado e não marcado como tomado, ela vai apitar a cada 5 minutos — feche a aba (ou marque o remédio como tomado / apague o cadastro) para parar. Não há servidor por trás; tudo é salvo localmente no navegador (`localStorage`), então os dados não sincronizam entre dispositivos diferentes.
+Não há servidor por trás; tudo é salvo localmente no navegador (`localStorage`), então os dados não sincronizam entre dispositivos diferentes.
